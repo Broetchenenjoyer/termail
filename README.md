@@ -16,15 +16,14 @@ Install you can take a .jar from the releases and do whatever you want, or use t
 The install.sh downloads the latest .jar from releases, adds "termail" as a starter keyword to your path and creates a launcher-entry(termail.desktop)
 
 command stuff:
-  "termail": this should just start the app in you terminal, if you used the install script
+    "termail": this should just start the app in you terminal, if you used the install script
 
-  arguments:
-    "help": explainations and example commands
-    "noui": runs the programm without ui
-    "send": keyword to tell the programm you want to send an E-Mail
-      "sender"='': the E-Mail you want the E-Mail to come from
-      "reciever=''": the recipients E-Mail
-      "subject=''": the subject line for the E-Mail
-      "message=''": the message body
-      "attachments={'example.pdf', 'example2.pdf'}": file paths to files you wish to send with this E-Mail 
-      
+    arguments:
+        "help": explainations and example commands
+        "noui": runs the programm without ui
+        "send": keyword to tell the programm you want to send an E-Mail
+            "sender"='': the E-Mail you want the E-Mail to come from
+            "reciever=''": the recipients E-Mail
+            "subject=''": the subject line for the E-Mail
+            "message=''": the message body
+            "attachments={'example.pdf', 'example2.pdf'}": file paths to files you wish to send with this E-Mail 
