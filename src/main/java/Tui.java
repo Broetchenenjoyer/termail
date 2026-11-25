@@ -18,15 +18,13 @@ public class Tui extends WindowListenerAdapter {
     private MailList list;
     private TextBox detail;
     private final Config cfg;
-    private final IMAP imap;
     private final SMTP smtp;
 
     private boolean inTextBox = false;
     private String mailBody = "";
 
-    public Tui(Config cfg, IMAP imap, SMTP smtp) throws Exception {
+    public Tui(Config cfg, SMTP smtp) throws Exception {
         this.cfg = cfg;
-        this.imap = imap;
         this.smtp = smtp;
 
         // needed so the terminals colors and so on can be used
@@ -64,7 +62,7 @@ public class Tui extends WindowListenerAdapter {
             Border accountsBox = accounts.withBorder(Borders.singleLine());
             accountsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 
-            mailDirs = new ComboBox<>(imap.getFolders(cfg.getCredentials(accounts.getSelectedItem())).toArray(new String[0])) {
+            mailDirs = new ComboBox<>(cfg.getIMAP(accounts.getSelectedItem()).getFolders().toArray(new String[0])) {
                 @Override
                 public Interactable.Result handleKeyStroke(KeyStroke key) {
                     return Tui.noArrowFocus(super.handleKeyStroke(key));
@@ -75,7 +73,7 @@ public class Tui extends WindowListenerAdapter {
             Border mailDirsBox = mailDirs.withBorder(Borders.singleLine());
             mailDirsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 
-            list = new MailList(imap.getMails(cfg.getCredentials(accounts.getSelectedItem()), mailDirs.getSelectedItem(), 0, 32), 32);
+            list = new MailList(cfg.getIMAP(accounts.getSelectedItem()).getMails(mailDirs.getSelectedItem(), 0, 32), 32);
             list.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
             list.setOnSelect(m -> readMail(m));
             list.setPreferredSize(new TerminalSize(Math.max(20, screen.getTerminalSize().getColumns() / 4), 0));
@@ -126,11 +124,11 @@ public class Tui extends WindowListenerAdapter {
     private void selectEmailAdr() {
         try {
             mailDirs.clearItems();
-            for (String s : imap.getFolders(cfg.getCredentials(accounts.getSelectedItem()))) {
+            for (String s : cfg.getIMAP(accounts.getSelectedItem()).getFolders()) {
                 mailDirs.addItem(s);
             }
             mailDirs.setSelectedItem(cfg.getCredentials(accounts.getSelectedItem()).STARTDIR);
-            list.setMails(imap.getMails(cfg.getCredentials(accounts.getSelectedItem()), mailDirs.getSelectedItem(), 0, 32));
+            list.setMails(cfg.getIMAP(accounts.getSelectedItem()).getMails(mailDirs.getSelectedItem(), 0, 32));
             detail.setText("");
             mailBody = "";
         } catch (Exception e) {
@@ -142,7 +140,7 @@ public class Tui extends WindowListenerAdapter {
 
     private void selectMailDir() {
         try {
-            list.setMails(imap.getMails(cfg.getCredentials(accounts.getSelectedItem()), mailDirs.getSelectedItem(), 0, 32));
+            list.setMails(cfg.getIMAP(accounts.getSelectedItem()).getMails(mailDirs.getSelectedItem(), 0, 32));
             detail.setText("");
             mailBody = "";
         } catch (Exception e) {

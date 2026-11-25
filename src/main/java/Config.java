@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.luaj.vm2.*;
@@ -18,6 +19,7 @@ public class Config {
 
     private final HashMap<String, Credentials> credentials = new HashMap<>();
     private final HashMap<String, MailServer> mailServers = new HashMap<>();
+    private final HashMap<String, IMAP> imapClients = new HashMap<>();
 
     private final List<String> spamDomains = new ArrayList<>();
     private final List<String> spamMails = new ArrayList<>();
@@ -43,7 +45,8 @@ public class Config {
         if (mails.istable()) {
             for (int i = 1; i <= mails.length(); i++) {
                 LuaValue login = mails.get(i);
-                credentials.put(login.get("mail").tojstring(), new Credentials(login.get("mail").tojstring(), login.get("pw").tojstring(), login.get("starting_folder").tojstring()));
+                Credentials credential = new Credentials(login.get("mail").tojstring(), login.get("pw").tojstring(), login.get("starting_folder").tojstring());
+                credentials.put(login.get("mail").tojstring(), credential);
             }
         }
 
@@ -103,6 +106,10 @@ public class Config {
         if (text.istable()) {
             maxLinebreakCount = text.get("max_linebreak_count").optint(1);
             linewrap = text.get("linewrap").optboolean(false);
+        }
+
+        for (Map.Entry<String, Credentials> set : credentials.entrySet()) {
+            imapClients.put(set.getKey(), new IMAP(set.getValue(), this));
         }
     }
 
@@ -183,6 +190,28 @@ public class Config {
 
     public String getTextEditor() {
         return texteditor;
+    }
+
+
+
+    public IMAP getIMAP(String mail) {
+        return imapClients.get(mail);
+    }
+
+
+
+    public void loginAll() throws IOException {
+        for (IMAP imap : imapClients.values()) {
+            imap.login();
+        }
+    }
+
+
+
+    public void logoutAll() throws IOException {
+        for (IMAP imap : imapClients.values()) {
+            imap.logout();
+        }
     }
 
 

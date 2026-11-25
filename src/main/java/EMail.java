@@ -35,16 +35,11 @@ public class EMail {
 
     public String getMailBody(String mailAdr) {
         try {
-            MailServer server = cfg.getMailServer(imap.getDomain(mailAdr));
-
-            imap.connect(server.IMAP, server.IMAPPORT);
             try {
-                imap.login(mailAdr, cfg.getCredentials(mailAdr).PW);
                 imap.select(DIR);
                 return imap.fetchText(UID);
             } finally {
                 try {
-                    imap.logout();
                 } catch (Exception ignored) {
                 }
             }

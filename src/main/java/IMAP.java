@@ -10,35 +10,30 @@ public class IMAP extends TLS {
     private int tagCounter = 0;
 
     private final Config cfg;
+    private final Credentials credential;
 
-    public IMAP(Config cfg) {
+    public IMAP(Credentials credential, Config cfg) throws IOException {
         this.cfg = cfg;
+        this.credential = credential;
+        MailServer server = cfg.getMailServer(getDomain(credential.MAIL));
+        connect(server.IMAP, server.IMAPPORT);
     }
 
-    public List<String> getFolders(Credentials credential) throws IOException {
+    public List<String> getFolders() throws IOException {
         ArrayList<String> result = new ArrayList<>();
-
-        connect(cfg.getMailServer(getDomain(credential.MAIL)).IMAP, cfg.getMailServer(getDomain(credential.MAIL)).IMAPPORT);
-        login(credential.MAIL, credential.PW);
 
         for (String s : command("LIST \"\" \"*\"")) {
             if (s.charAt(0) == '*')
                 result.add(s.split("\"/\"")[1].strip());
         }
-
-        logout();
         return result;
     }
 
 
 
-    public List<EMail> getMails(Credentials credential, String serverDir, int from, int to) throws IOException {
+    public List<EMail> getMails(String serverDir, int from, int to) throws IOException {
         ArrayList<EMail> mails = new ArrayList<>();
-
-        connect(cfg.getMailServer(getDomain(credential.MAIL)).IMAP, cfg.getMailServer(getDomain(credential.MAIL)).IMAPPORT);
-        login(credential.MAIL, credential.PW);
         int count = select(serverDir);
-
         if (from < count) {
             for (EMail m : EMail.parse(serverDir, fetchHeaders(count - from, Math.max(1, count - to)), cfg, this)) {
                 if (!m.isSpam()) {
@@ -46,35 +41,23 @@ public class IMAP extends TLS {
                 }
             }
         }
-
-        logout();
         return mails.reversed();
     }
 
 
 
-    public void deleteMails(Credentials credential, List<EMail> mails) throws IOException {
-        connect(cfg.getMailServer(getDomain(credential.MAIL)).IMAP, cfg.getMailServer(getDomain(credential.MAIL)).IMAPPORT);
-        login(credential.MAIL, credential.PW);
-
+    public void deleteMails(List<EMail> mails) throws IOException {
         for (EMail m : mails) {
             delete(m.UID);
         }
-
-        logout();
     }
 
 
 
-    public void moveMails(Credentials credential, List<EMail> mails, String target) throws IOException {
-        connect(cfg.getMailServer(getDomain(credential.MAIL)).IMAP, cfg.getMailServer(getDomain(credential.MAIL)).IMAPPORT);
-        login(credential.MAIL, credential.PW);
-
+    public void moveMails(List<EMail> mails, String target) throws IOException {
         for (EMail m : mails) {
             move(m.UID, target);
         }
-
-        logout();
     }
 
 
@@ -201,8 +184,8 @@ public class IMAP extends TLS {
 
 
 
-    public void login(String user, String pass) throws IOException {
-        command("LOGIN " + quote(user) + " " + quote(pass));
+    public void login() throws IOException {
+        command("LOGIN " + quote(credential.MAIL) + " " + quote(credential.PW));
     }
 
 

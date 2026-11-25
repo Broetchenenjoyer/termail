@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class Main {
-    private static IMAP imap;
     private static SMTP smtp;
     private static Config cfg;
 
@@ -12,14 +11,16 @@ public class Main {
         try {
             cfg = new Config(System.getProperty("user.home") + "/.config/termail/config.lua");
 
-            imap = new IMAP(cfg);
+            cfg.loginAll();
             smtp = new SMTP(cfg);
 
             runArgs(args);
 
             if (ui) {
-                new Tui(cfg, imap, smtp);
+                new Tui(cfg, smtp);
             }
+
+            cfg.logoutAll();
 
         } catch (Exception e) {
             System.err.println("Idk what happend. I am sowy: " + e.getMessage());
