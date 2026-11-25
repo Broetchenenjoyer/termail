@@ -1,9 +1,6 @@
 import java.io.IOException;
 import java.nio.file.Path;
 
-// maybe toemail nennen ._.
-// oder Termail
-// oder Fmail
 public class Main {
     private static IMAP imap;
     private static SMTP smtp;
@@ -107,7 +104,7 @@ public class Main {
         System.out.println("""
             To send an E-Mail:
             use 'send'
-            and specify 'sender="" reciever="" subject="" message="" and optionally attachment={"", ""}'
+            and specify: 'sender="" reciever="" subject="" message="" and optionally attachment={"", ""}'
 
             To run the programm without ui:
             use 'noui'

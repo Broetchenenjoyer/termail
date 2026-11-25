@@ -29,7 +29,7 @@ public class Tui extends WindowListenerAdapter {
         this.imap = imap;
         this.smtp = smtp;
 
-        //needed so the terminals theme should be used
+        // needed so the terminals colors and so on can be used
         theme = SimpleTheme.makeTheme(false, TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT, TextColor.ANSI.DEFAULT, TextColor.ANSI.BLACK, TextColor.ANSI.WHITE, TextColor.ANSI.DEFAULT);
 
         Screen screen = new TerminalScreen(new DefaultTerminalFactory().createTerminal());
@@ -54,10 +54,6 @@ public class Tui extends WindowListenerAdapter {
             detail.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
             detail.setEnabled(inTextBox);
 
-            Panel right = new Panel();
-            right.addComponent(detail);
-            right.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
-
             accounts = new ComboBox<>(cfg.getEmails()) {
                 @Override
                 public Interactable.Result handleKeyStroke(KeyStroke key) {
@@ -66,7 +62,7 @@ public class Tui extends WindowListenerAdapter {
             };
             accounts.addListener((selectedIndex, previousSelection, byUser) -> this.selectEmailAdr());
             Border accountsBox = accounts.withBorder(Borders.singleLine());
-            accountsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+            accountsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 
             mailDirs = new ComboBox<>(imap.getFolders(cfg.getCredentials(accounts.getSelectedItem())).toArray(new String[0])) {
                 @Override
@@ -77,29 +73,46 @@ public class Tui extends WindowListenerAdapter {
             mailDirs.setSelectedItem(cfg.getCredentials(accounts.getSelectedItem()).STARTDIR);
             mailDirs.addListener((selectedIndex, previusSelection, byUser) -> this.selectMailDir());
             Border mailDirsBox = mailDirs.withBorder(Borders.singleLine());
-            mailDirsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+            mailDirsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 
             list = new MailList(imap.getMails(cfg.getCredentials(accounts.getSelectedItem()), mailDirs.getSelectedItem(), 0, 32), 32);
             list.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
             list.setOnSelect(m -> readMail(m));
+            list.setPreferredSize(new TerminalSize(Math.max(20, screen.getTerminalSize().getColumns() / 4), 0));
 
+            accountsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+            mailDirsBox.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+
+            Separator hSepLeft = new Separator(Direction.HORIZONTAL);
+            hSepLeft.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+            Separator hSepRight = new Separator(Direction.HORIZONTAL);
+            hSepRight.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+
+            // Links: Account / Linie / Liste
             Panel left = new Panel(new LinearLayout(Direction.VERTICAL));
             left.addComponent(accountsBox);
-            left.addComponent(mailDirsBox);
-            left.addComponent(new EmptySpace(new TerminalSize(0, 1)));
+            left.addComponent(hSepLeft);
             left.addComponent(list);
             left.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
 
-            Separator sep = new Separator(Direction.VERTICAL);
-            sep.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+            // Rechts: Ordner / Linie / Detail
+            Panel right = new Panel(new LinearLayout(Direction.VERTICAL));
+            right.addComponent(mailDirsBox);
+            right.addComponent(hSepRight);
+            right.addComponent(detail);
+            right.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill, LinearLayout.GrowPolicy.CanGrow));
+
+            Separator vSep = new Separator(Direction.VERTICAL);
+            vSep.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
 
             Panel content = new Panel(new LinearLayout(Direction.HORIZONTAL));
-            content.addComponent(new EmptySpace(new TerminalSize(1, 0))); // Padding left
+            content.addComponent(new EmptySpace(new TerminalSize(1, 0)));
             content.addComponent(left);
-            content.addComponent(new EmptySpace(new TerminalSize(1, 0))); // distance to line
-            content.addComponent(sep);
-            content.addComponent(new EmptySpace(new TerminalSize(1, 0))); // distance after the line
+            content.addComponent(new EmptySpace(new TerminalSize(1, 0)));
+            content.addComponent(vSep);
+            content.addComponent(new EmptySpace(new TerminalSize(1, 0)));
             content.addComponent(right);
+
 
             window.setComponent(content);
             gui.addWindowAndWait(window);
@@ -169,6 +182,7 @@ public class Tui extends WindowListenerAdapter {
 
     @Override
     public void onResized(Window window, TerminalSize oldSize, TerminalSize newSize) {
+        list.setPreferredSize(new TerminalSize(Math.max(20, newSize.getColumns() / 4), 0));
         if (!detail.getText().isBlank() && this.cfg.wantsTextWrapped()) {
             wrapText(mailBody);
         }

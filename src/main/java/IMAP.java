@@ -142,7 +142,7 @@ public class IMAP extends TLS {
         while (m.find()) {
             String between = s.substring(last, m.start());
             if (!between.isBlank())
-                out.append(between); // Leerraum zwischen Encoded-Words entfällt
+                out.append(between);
             try {
                 Charset cs = Charset.forName(m.group(1));
                 byte[] data;
@@ -153,7 +153,7 @@ public class IMAP extends TLS {
                 }
                 out.append(new String(data, cs));
             } catch (Exception e) {
-                out.append(m.group()); // im Zweifel unverändert lassen
+                out.append(m.group());
             }
             last = m.end();
         }
@@ -233,12 +233,5 @@ public class IMAP extends TLS {
 
     public void logout() throws IOException {
         command("LOGOUT");
-    }
-
-
-
-    @Override
-    public boolean expectedGreeting(String greeting) {
-        return greeting.startsWith("* OK");
     }
 }

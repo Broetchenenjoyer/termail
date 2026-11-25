@@ -18,7 +18,7 @@ URL=$(printf '%s' "$JSON" | grep '"browser_download_url"' | grep -m1 '\.jar"' | 
 [ -n "$TAG" ] || { echo "Couldn't find a release." >&2; exit 1; }
 [ -n "$URL" ] || { echo "No .jar-Asset in release $TAG." >&2; exit 1; }
 
-# Update nötig?
+# Update?
 if [ -f "$SHARE/VERSION" ] && [ "$(cat "$SHARE/VERSION")" = "$TAG" ]; then
     echo "allready up to date ($TAG)."
     exit 0
@@ -29,14 +29,14 @@ curl -fsSL -o "$SHARE/$APP.jar.tmp" "$URL"
 mv "$SHARE/$APP.jar.tmp" "$SHARE/$APP.jar"
 printf '%s' "$TAG" > "$SHARE/VERSION"
 
-# Starter im PATH
+# Starter in PATH
 cat > "$BIN/$APP" <<EOF
 #!/bin/sh
 exec java -jar "$SHARE/$APP.jar" "\$@"
 EOF
 chmod +x "$BIN/$APP"
 
-# Launcher-Eintrag (TUI -> Terminal=true)
+# Launcher-Entry(TUI -> Terminal=true)
 cat > "$DESKTOP/$APP.desktop" <<EOF
 [Desktop Entry]
 Type=Application

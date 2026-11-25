@@ -12,9 +12,9 @@ import org.luaj.vm2.lib.jse.*;
 public class Config {
 
     public static final int HIDE = 0, DELETE = 1, MOVE = 2;
+    private static final Globals globals = JsePlatform.standardGlobals();
 
     private final File config;
-    private static final Globals globals = JsePlatform.standardGlobals();
 
     private final HashMap<String, Credentials> credentials = new HashMap<>();
     private final HashMap<String, MailServer> mailServers = new HashMap<>();
@@ -26,7 +26,8 @@ public class Config {
     private String spamDestination = "Spam";
 
     private boolean linewrap = false;
-    private int maxLinebreakCount = -1;
+    private int maxLinebreakCount = 1;
+    private String texteditor = "native";
 
     public Config(String path) throws IOException {
         config = new File(path);
@@ -95,6 +96,8 @@ public class Config {
                 }
             }
         }
+
+        this.texteditor = cfg.get("texteditor").optjstring("native");
 
         LuaValue text = cfg.get("text");
         if (text.istable()) {
@@ -174,6 +177,12 @@ public class Config {
 
     public String getSpamDestination() {
         return spamDestination;
+    }
+
+
+
+    public String getTextEditor() {
+        return texteditor;
     }
 
 

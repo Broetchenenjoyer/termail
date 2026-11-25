@@ -156,11 +156,4 @@ public class SMTP extends TLS {
             throw new IOException("Unexpected reply (Expected:" + code + "): " + last);
         }
     }
-
-
-
-    @Override
-    public boolean expectedGreeting(String greeting) {
-        return greeting.startsWith("220");
-    }
 }

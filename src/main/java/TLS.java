@@ -31,9 +31,13 @@ public class TLS {
         }
     }
 
+
+
     public boolean expectedGreeting(String greeting) {
-        return true;
+        return greeting != null && (greeting.startsWith("* OK") || greeting.startsWith("* PREAUTH"));
     }
+
+
 
     public static String getDomain(String adr) {
         if (adr.contains("@")) {
